@@ -89,12 +89,12 @@
                radial-gradient(46% 58% at 92% 86%,rgba(0,240,255,.08),transparent 62%)}
   .form-neon{position:relative;background:#fff;box-shadow:0 14px 40px -30px rgba(18,21,28,.35)}
 
-  /* Portfolio flyers : N&B au repos, couleur au survol */
+  /* Portfolio flyers : N&B au repos, couleur au survol (raccord avec le thème épuré) */
   .pf-card{border:2.5px solid #00F0FF;box-shadow:0 0 0 1px rgba(0,240,255,.45),0 8px 26px -12px rgba(0,240,255,.6);transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .4s,border-color .4s}
   .pf-card:hover{transform:translateY(-5px);border-color:transparent;box-shadow:0 24px 50px -30px rgba(0,240,255,.35)}
   @media (hover:hover){
-    .pf-card .poster{filter:grayscale(1) contrast(1.03);transition:filter .45s ease}
-    .pf-card:hover .poster{filter:none}
+    .pf-card img{filter:grayscale(1) contrast(1.03);transition:filter .45s ease}
+    .pf-card:hover img{filter:none}
   }
 
   /* Marquee */
@@ -103,11 +103,11 @@
 
   #hero-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
 
-  /* Nav toujours sombre */
+  /* Nav toujours sombre (barre premium sur fond clair ou foncé) */
   #nav{background:rgba(10,10,12,.55);backdrop-filter:blur(12px);transition:background .3s,border-color .3s}
   #nav.scrolled{background:rgba(10,10,12,.9);border-bottom:1px solid #1E1E27}
 
-  /* ---- Posters de flyers CSS ---- */
+  /* ---- Posters de flyers (exemples) ---- */
   .poster{position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--pbg);color:var(--pink);display:flex;flex-direction:column;padding:14px 14px 42px;font-weight:800;font-family:'Space Grotesk',sans-serif}
   .poster::after{content:"";position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:70%;aspect-ratio:1;border-radius:50%;z-index:0;filter:blur(8px);background:radial-gradient(circle,color-mix(in srgb,var(--pacc) 50%,transparent),transparent 68%)}
   .poster .cat{position:absolute;top:10px;right:10px;z-index:3;font-size:9px;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,0,0,.5);color:#fff;padding:4px 8px;border-radius:100px;font-weight:700}
@@ -121,7 +121,6 @@
   .poster .price small{display:block;font-size:7.5px;font-weight:800;color:var(--pacc);letter-spacing:.04em;text-transform:uppercase}
   .poster .price b{font-size:17px;letter-spacing:-.01em}
   .poster .cta{position:absolute;left:0;right:0;bottom:0;z-index:2;background:var(--pacc);color:#fff;text-align:center;font-size:11px;letter-spacing:.05em;padding:10px;text-transform:uppercase}
-  
   .t-auto{--pbg:linear-gradient(165deg,#22262e,#0c0e11 70%,#2a1210);--pink:#fff;--pacc:#E23B2E}
   .t-crousty{--pbg:linear-gradient(160deg,#241713,#0d0b0a 55%,#320f0c);--pink:#fff;--pacc:#E4322B}
   .t-chick{--pbg:linear-gradient(160deg,#F8D032,#F0B406);--pink:#17181c;--pacc:#E4322B}
@@ -171,6 +170,7 @@
       <span data-hero class="inline-flex items-center gap-2 text-xs tracking-[.25em] uppercase text-cyan mb-6">
         <span class="w-8 h-px bg-cyan"></span> Pour les commerces &amp; artisans
       </span>
+      <!-- ✏️ TITRE -->
       <h1 data-hero class="font-display font-extrabold leading-[0.95] tracking-tight text-[clamp(2rem,5.5vw,4.25rem)]">
         IMPOSSIBLE<br>À <span class="text-gradient">IGNORER.</span>
       </h1>
@@ -232,6 +232,7 @@
     </div>
 
     <!-- 🃏 CARTES SERVICES -->
+    <!-- 3 PÔLES -->
     <div class="grid md:grid-cols-3 gap-4">
 
       <!-- Pôle 1 -->
@@ -296,7 +297,8 @@
   </div>
 </section>
 
-<!-- ================= TARIFS ================= -->
+<!-- ================= TARIFS =================
+     💶 MODIFIE TES PRIX ICI — ce sont des montants indicatifs à ajuster -->
 <section id="tarifs" class="py-5 md:py-8 px-5 md:px-8 bg-sand">
   <div class="max-w-7xl mx-auto">
     <div class="text-center max-w-2xl mx-auto mb-5">
@@ -380,59 +382,8 @@
       <p data-reveal class="text-mutedL mt-4">Des visuels réalisés pour des commerces. Survolez une carte pour la voir en couleur.</p>
     </div>
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-
-      <!-- Poster 1: Crousty Fast Food -->
       <div data-reveal class="pf-card rounded-2xl overflow-hidden bg-white">
-        <div class="poster t-crousty">
-          <div class="cat">Fast Food</div>
-          <div class="brand"><span class="bl">C</span> Crousty</div>
-          <div class="ttl">Menu <span class="acc">Crousty</span> Burger</div>
-          <div class="sub">Poulet croustillant &amp; sauce maison</div>
-          <div class="emo">🍔</div>
-          <div class="price"><small>À partir de</small><b>8,90€</b></div>
-          <div class="cta">Commandez vite</div>
-        </div>
-      </div>
-
-      <!-- Poster 2: Crunchy Chick -->
-      <div data-reveal class="pf-card rounded-2xl overflow-hidden bg-white">
-        <div class="poster t-chick">
-          <div class="cat">Restauration</div>
-          <div class="brand"><span class="bl">K</span> Crunchy Chick</div>
-          <div class="ttl">Tenders <span class="acc">&amp; Wings</span></div>
-          <div class="sub">100% filet de poulet marinée</div>
-          <div class="emo">🍗</div>
-          <div class="price"><small>Bucket dès</small><b>12,50€</b></div>
-          <div class="cta">Sur place ou à emporter</div>
-        </div>
-      </div>
-
-      <!-- Poster 3: Sushi Time -->
-      <div data-reveal class="pf-card rounded-2xl overflow-hidden bg-white">
-        <div class="poster t-sushi">
-          <div class="cat">Japonais</div>
-          <div class="brand"><span class="bl">S</span> Sushi Time</div>
-          <div class="ttl">Box <span class="acc">Salmon</span> Premium</div>
-          <div class="sub">24 pièces fraîcheur garantie</div>
-          <div class="emo">🍣</div>
-          <div class="price"><small>La Box à</small><b>19,90€</b></div>
-          <div class="cta">Livraison offerte</div>
-        </div>
-      </div>
-
-      <!-- Poster 4: Garage Auto -->
-      <div data-reveal class="pf-card rounded-2xl overflow-hidden bg-white">
-        <div class="poster t-auto">
-          <div class="cat">Automobile</div>
-          <div class="brand"><span class="bl">G</span> Auto Service</div>
-          <div class="ttl">Révision <span class="acc">Complète</span></div>
-          <div class="sub">Vidange, filtres &amp; 30 points de contrôle</div>
-          <div class="emo">🚗</div>
-          <div class="price"><small>Forfait</small><b>89,00€</b></div>
-          <div class="cta">Prendre RDV</div>
-        </div>
-      </div>
-
+        <img src="data:image/jpeg;base64,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 /9k=" alt="Flyer Garage Automobile" class="block w-full aspect-[4/5] object-cover">      </div>
     </div>
   </div>
 </section>
