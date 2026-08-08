@@ -1,1 +1,622 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>kodevia — Votre image, entre de bonnes mains</title>
 
+<!-- ============ CDN ============ -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<!-- ============ COULEURS ============ -->
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink:    '#0A0A0C',
+          panel:  '#111117',
+          edge:   '#1E1E27',
+          cyan:   '#00F0FF',
+          sand:   '#F5F7FA',
+          cream:  '#FFFFFF',
+          lineL:  '#E6E9F0',
+          inkL:   '#12151C',
+          mutedL: '#5B6472',
+          warm:   '#5B6472',
+        },
+        fontFamily: {
+          display: ['Syne', 'sans-serif'],
+          body:    ['Space Grotesk', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  html{scroll-behavior:smooth}
+  body{background:#F5F7FA;color:#12151C;font-family:'Space Grotesk',sans-serif;overflow-x:hidden}
+  ::selection{background:#00F0FF;color:#0A0A0C}
+  a:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid #00C2DD;outline-offset:3px;border-radius:4px}
+
+  .text-gradient{background:linear-gradient(100deg,#00F0FF,#8AF6FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .text-grad-l{background:linear-gradient(transparent 58%, rgba(0,240,255,.7) 58%);color:inherit;font-weight:800;padding:0 .05em}
+  .ico-grad{display:inline-grid;place-items:center;width:3.1rem;height:3.1rem;border-radius:.85rem;background:#0A0A0C;color:#00F0FF;font-size:1.3rem!important;box-shadow:0 8px 22px -10px rgba(0,240,255,.55)}
+
+  .btn-glow{transition:.3s cubic-bezier(.2,.7,.2,1)}
+  .btn-glow:hover{transform:translateY(-2px);box-shadow:0 0 0 1px #00F0FF,0 10px 40px -8px rgba(0,240,255,.7)}
+  .btn-warm{background:#00F0FF;color:#05242B;transition:.3s cubic-bezier(.2,.7,.2,1)}
+  .btn-warm:hover{transform:translateY(-2px);background:#4DF4FF;box-shadow:0 16px 40px -12px rgba(0,240,255,.6)}
+  .btn-outline{border:1px solid #E6E9F0;transition:.3s}
+  .btn-outline:hover{border-color:#2A2620;transform:translateY(-2px)}
+
+  .tilt{transform-style:preserve-3d;transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .4s,border-color .4s;will-change:transform}
+  .tilt:hover{border-color:rgba(0,240,255,.55);box-shadow:0 30px 60px -34px rgba(0,240,255,.28)}
+  .tilt .depth{transform:translateZ(40px)}
+  .tilt .glow-orb{position:absolute;inset:auto -30% -40% auto;width:60%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(0,240,255,.30),transparent 65%);filter:blur(18px);opacity:0;transition:opacity .4s;pointer-events:none}
+  .tilt:hover .glow-orb{opacity:1}
+
+  .field-in{background:#fff;border:1px solid #E6E9F0;transition:.3s;color:#12151C}
+  .field-in::placeholder{color:#9AA1AE}
+  .field-in:focus{outline:none;border-color:#00C6DE;box-shadow:0 0 0 3px rgba(0,240,255,.22)}
+
+  .contact-glow{position:absolute;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(44% 55% at 10% 16%,rgba(0,240,255,.10),transparent 62%),
+               radial-gradient(46% 58% at 92% 86%,rgba(0,240,255,.08),transparent 62%)}
+  .form-neon{position:relative;background:#fff;box-shadow:0 14px 40px -30px rgba(18,21,28,.35)}
+
+  .pf-card{border:2.5px solid #00F0FF;box-shadow:0 0 0 1px rgba(0,240,255,.45),0 8px 26px -12px rgba(0,240,255,.6);transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .4s,border-color .4s}
+  .pf-card:hover{transform:translateY(-5px);border-color:transparent;box-shadow:0 24px 50px -30px rgba(0,240,255,.35)}
+  @media (hover:hover){
+    .pf-card .poster{filter:grayscale(1) contrast(1.03);transition:filter .45s ease}
+    .pf-card:hover .poster{filter:none}
+  }
+
+  .marquee{display:flex;gap:3rem;white-space:nowrap;animation:scrollx 28s linear infinite}
+  @keyframes scrollx{to{transform:translateX(-50%)}}
+
+  #hero-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+
+  #nav{background:rgba(10,10,12,.55);backdrop-filter:blur(12px);transition:background .3s,border-color .3s}
+  #nav.scrolled{background:rgba(10,10,12,.9);border-bottom:1px solid #1E1E27}
+
+  /* ---- Posters de flyers CSS ---- */
+  .poster{position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--pbg);color:var(--pink);display:flex;flex-direction:column;padding:14px 14px 42px;font-weight:800;font-family:'Space Grotesk',sans-serif}
+  .poster::after{content:"";position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:70%;aspect-ratio:1;border-radius:50%;z-index:0;filter:blur(8px);background:radial-gradient(circle,color-mix(in srgb,var(--pacc) 50%,transparent),transparent 68%)}
+  .poster .cat{position:absolute;top:10px;right:10px;z-index:3;font-size:9px;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,0,0,.5);color:#fff;padding:4px 8px;border-radius:100px;font-weight:700}
+  .poster .brand{display:flex;align-items:center;gap:7px;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;position:relative;z-index:2}
+  .poster .brand .bl{width:19px;height:19px;border-radius:50%;background:var(--pacc);display:grid;place-items:center;color:#fff;font-size:10px}
+  .poster .ttl{font-size:clamp(19px,3.3vw,25px);line-height:.92;margin-top:9px;letter-spacing:-.01em;text-transform:uppercase;position:relative;z-index:2}
+  .poster .ttl .acc{color:var(--pacc)}
+  .poster .sub{font-size:9.5px;font-weight:600;opacity:.82;margin-top:6px;position:relative;z-index:2;line-height:1.3}
+  .poster .emo{position:absolute;left:50%;top:49%;transform:translate(-50%,-50%);z-index:1;font-size:clamp(50px,9vw,74px);filter:drop-shadow(0 12px 18px rgba(0,0,0,.5));font-weight:400}
+  .poster .price{position:absolute;z-index:2;bottom:52px;right:12px;background:#fff;color:#12141a;border-radius:9px;padding:6px 10px;text-align:center;line-height:1;box-shadow:0 10px 20px -8px rgba(0,0,0,.55)}
+  .poster .price small{display:block;font-size:7.5px;font-weight:800;color:var(--pacc);letter-spacing:.04em;text-transform:uppercase}
+  .poster .price b{font-size:17px;letter-spacing:-.01em}
+  .poster .cta{position:absolute;left:0;right:0;bottom:0;z-index:2;background:var(--pacc);color:#fff;text-align:center;font-size:11px;letter-spacing:.05em;padding:10px;text-transform:uppercase}
+  
+  .t-auto{--pbg:linear-gradient(165deg,#22262e,#0c0e11 70%,#2a1210);--pink:#fff;--pacc:#E23B2E}
+  .t-crousty{--pbg:linear-gradient(160deg,#241713,#0d0b0a 55%,#320f0c);--pink:#fff;--pacc:#E4322B}
+  .t-chick{--pbg:linear-gradient(160deg,#F8D032,#F0B406);--pink:#17181c;--pacc:#E4322B}
+  .t-sushi{--pbg:linear-gradient(165deg,#1c1610,#0c0b0a 60%,#301c0b);--pink:#fff;--pacc:#F0801E}
+
+  @media (prefers-reduced-motion:reduce){.marquee{animation:none}}
+</style>
+</head>
+
+<body class="antialiased">
+
+<!-- ================= NAV ================= -->
+<header id="nav" class="fixed top-0 inset-x-0 z-50">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 h-20 flex items-center justify-between">
+    <a href="#top" class="flex items-center gap-3">
+      <span class="w-10 h-10 rounded-xl grid place-items-center border border-edge bg-panel">
+        <svg viewBox="0 0 128 128" class="w-6 h-6">
+          <rect x="30" y="34" width="15" height="61" rx="7.5" fill="#F4F4F6"/>
+          <path d="M90 33 L55 64 L90 95" fill="none" stroke="#F4F4F6" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="80" cy="46" r="6.5" fill="#00F0FF"/>
+        </svg>
+      </span>
+      <span class="leading-none text-white">
+        <span class="block font-display font-bold text-lg tracking-tight">kodevia</span>
+        <span class="block text-[9px] tracking-[.3em] text-white/50 uppercase mt-0.5">Votre image, soignée</span>
+      </span>
+    </a>
+    <nav class="hidden lg:flex items-center gap-9 text-sm text-white/70">
+      <a href="#services" class="hover:text-white transition">Ce qu'on fait</a>
+      <a href="#tarifs" class="hover:text-white transition">Tarifs</a>
+      <a href="#exemples" class="hover:text-white transition">Exemples</a>
+      <a href="#contact" class="hover:text-white transition">Contact</a>
+    </nav>
+    <a href="#contact" class="btn-glow bg-cyan text-ink text-sm font-bold px-5 py-2.5 rounded-lg">
+      Devis gratuit <i class="fa-solid fa-arrow-right ml-1"></i>
+    </a>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section id="top" class="relative min-h-screen flex items-center overflow-hidden bg-ink text-white">
+  <canvas id="hero-canvas"></canvas>
+  <div class="absolute inset-0 z-[1] pointer-events-none" style="background:radial-gradient(135% 110% at 72% 46%,transparent 46%,#0A0A0C 96%)"></div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-5 md:px-8 w-full pt-24 pb-12">
+    <div class="max-w-3xl">
+      <span data-hero class="inline-flex items-center gap-2 text-xs tracking-[.25em] uppercase text-cyan mb-6">
+        <span class="w-8 h-px bg-cyan"></span> Pour les commerces &amp; artisans
+      </span>
+      <h1 data-hero class="font-display font-extrabold leading-[0.95] tracking-tight text-[clamp(2rem,5.5vw,4.25rem)]">
+        IMPOSSIBLE<br>À <span class="text-gradient">IGNORER.</span>
+      </h1>
+      <p data-hero class="mt-6 text-lg md:text-xl text-white/70 max-w-xl leading-relaxed">
+        On s'occupe de toute l'image de votre commerce : site internet, logo, flyers, menus et avis Google.
+        Simple, rapide, au même endroit.
+      </p>
+      <div data-hero class="mt-6 flex flex-wrap gap-4">
+        <a href="#contact" class="btn-glow bg-cyan text-ink font-bold px-7 py-4 rounded-xl">Demander un devis gratuit</a>
+        <a href="#exemples" class="btn-glow border border-edge px-7 py-4 rounded-xl font-semibold hover:border-white/50">Voir des exemples</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 text-white/50 text-xs tracking-widest flex flex-col items-center gap-2">
+    <span>DÉCOUVRIR</span><i class="fa-solid fa-chevron-down animate-bounce"></i>
+  </div>
+</section>
+
+<!-- ================= MARQUEE ================= -->
+<div class="border-y border-lineL py-3 bg-cream overflow-hidden">
+  <div class="marquee font-display font-bold text-2xl md:text-3xl uppercase tracking-tight text-inkL">
+    <span class="flex gap-12">
+      <span>Sites web</span><span class="text-[#00C2DD]">✦</span><span>SEO Google</span><span class="text-[#00C2DD]">✦</span><span>Meta Ads</span><span class="text-[#00C2DD]">✦</span>
+      <span>Google Ads</span><span class="text-[#00C2DD]">✦</span><span>TikTok Ads</span><span class="text-[#00C2DD]">✦</span><span>Apps IA</span><span class="text-[#00C2DD]">✦</span><span>Automatisation</span><span class="text-[#00C2DD]">✦</span>
+    </span>
+    <span class="flex gap-12" aria-hidden="true">
+      <span>Sites web</span><span class="text-[#00C2DD]">✦</span><span>SEO Google</span><span class="text-[#00C2DD]">✦</span><span>Meta Ads</span><span class="text-[#00C2DD]">✦</span>
+      <span>Google Ads</span><span class="text-[#00C2DD]">✦</span><span>TikTok Ads</span><span class="text-[#00C2DD]">✦</span><span>Apps IA</span><span class="text-[#00C2DD]">✦</span><span>Automatisation</span><span class="text-[#00C2DD]">✦</span>
+    </span>
+  </div>
+</div>
+
+<!-- ================= VISION ================= -->
+<section id="vision" class="py-5 md:py-8 px-5 md:px-8 bg-sand">
+  <div class="max-w-5xl mx-auto">
+    <span data-reveal class="text-xs tracking-[.25em] uppercase text-mutedL">Notre idée</span>
+    <h2 data-reveal class="font-display font-medium mt-4 leading-[1.45] tracking-tight text-inkL text-[clamp(1.3rem,2.6vw,1.95rem)] max-w-3xl">
+      Dans votre quartier, il y a d'autres garages, d'autres restos, d'autres salons.
+      On fait en sorte que ce soit <span class="text-grad-l">vous qu'on appelle en premier</span>.
+    </h2>
+    <p data-reveal class="mt-6 text-lg text-mutedL max-w-2xl leading-relaxed">
+      Pas de grands mots. Une belle image, des supports qui donnent confiance,
+      et des clients qui vous trouvent facilement. C'est tout — et c'est beaucoup.
+    </p>
+  </div>
+</section>
+
+<!-- ================= SERVICES ================= -->
+<section id="services" class="py-5 md:py-8 px-5 md:px-8 bg-cream">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-5">
+      <div>
+        <span data-reveal class="text-xs tracking-[.25em] uppercase text-warm">Ce qu'on fait</span>
+        <h2 data-reveal class="font-display font-bold mt-4 text-inkL text-[clamp(1.5rem,3.2vw,2.3rem)] leading-none tracking-tight">
+          Trois formules,<br>un seul partenaire.
+        </h2>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <!-- Pôle 1 -->
+      <article data-reveal class="tilt relative overflow-hidden bg-white border border-lineL rounded-2xl p-6 flex flex-col">
+        <div class="glow-orb"></div>
+        <div class="depth flex flex-col h-full">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-rocket text-3xl ico-grad shrink-0"></i>
+            <h3 class="font-display font-bold text-lg leading-tight text-inkL">Formule Décollage</h3>
+          </div>
+          <p class="text-inkL mt-3 text-sm leading-relaxed">Création de votre présence web professionnelle complète pour démarrer sereinement.</p>
+          <ul class="mt-4 space-y-2 text-sm text-inkL/85">
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Site Vitrine Moderne (jusqu'à 3 pages)</li>
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Optimisation &amp; Fiche Google My Business</li>
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Formulaire de contact &amp; Intégration WhatsApp</li>
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Référencement local de base (SEO)</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- Pôle 2 -->
+      <article data-reveal class="tilt relative overflow-hidden bg-white border border-lineL rounded-2xl p-6 flex flex-col">
+        <div class="glow-orb"></div>
+        <div class="depth flex flex-col h-full">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-chart-line text-3xl ico-grad shrink-0"></i>
+            <h3 class="font-display font-bold text-lg leading-tight text-inkL">Formule Croissance</h3>
+          </div>
+          <p class="text-inkL mt-3 text-sm leading-relaxed">Générez un flux continu de nouveaux clients chaque mois grâce à la publicité ciblée.</p>
+          <ul class="mt-4 space-y-2 text-sm text-inkL/85">
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Campagnes Meta Ads &amp; Google Ads</li>
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Création mensuelle de visuels &amp; vidéos ciblés</li>
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Landing Page de conversion optimisée</li>
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Suivi des résultats &amp; ajustements mensuels</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- Pôle 3 -->
+      <article data-reveal class="tilt relative overflow-hidden bg-white border border-lineL rounded-2xl p-6 flex flex-col">
+        <div class="glow-orb"></div>
+        <div class="depth flex flex-col h-full">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-gears text-3xl ico-grad shrink-0"></i>
+            <h3 class="font-display font-bold text-lg leading-tight text-inkL">Formule Révolution IA</h3>
+          </div>
+          <p class="text-inkL mt-3 text-sm leading-relaxed">Automatisez les tâches répétitives de votre commerce et gagnez plusieurs heures par semaine.</p>
+          <ul class="mt-4 space-y-2 text-sm text-inkL/85">
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Chatbot IA personnalisé pour vos clients</li>
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Automatisation de la gestion des rendez-vous</li>
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Système automatique de récolte d'avis Google</li>
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Relances clients automatiques par SMS/WhatsApp</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <div data-reveal class="text-center mt-6">
+      <a href="#contact" class="btn-warm inline-block font-bold px-7 py-3.5 rounded-xl">Un projet ? Devis gratuit <i class="fa-solid fa-arrow-right ml-1"></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TARIFS ================= -->
+<section id="tarifs" class="py-5 md:py-8 px-5 md:px-8 bg-sand">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center max-w-2xl mx-auto mb-5">
+      <span data-reveal class="text-xs tracking-[.25em] uppercase text-warm">Tarifs</span>
+      <h2 data-reveal class="font-display font-bold mt-4 text-inkL text-[clamp(1.5rem,3.2vw,2.3rem)] leading-none tracking-tight">
+        Des <span class="text-grad-l">prix clairs</span>, sans surprise
+      </h2>
+      <p data-reveal class="text-mutedL mt-4">Trois formules pour démarrer. Chaque projet reçoit un devis précis sous 24h.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4 items-start">
+      <!-- Pack 1 -->
+      <article data-reveal class="tilt relative overflow-hidden bg-white border border-lineL rounded-2xl p-6 flex flex-col">
+        <div class="glow-orb"></div>
+        <div class="depth flex flex-col h-full">
+          <span class="text-xs uppercase tracking-widest text-mutedL">Démarrage</span>
+          <div class="mt-3 flex items-end gap-1">
+            <span class="text-mutedL text-sm mb-1">dès</span>
+            <span class="font-display font-extrabold text-4xl text-inkL">590€</span>
+          </div>
+          <p class="text-mutedL mt-2 text-sm">Pack Décollage — Pour poser des bases solides en ligne.</p>
+          <ul class="mt-4 space-y-2 text-sm text-inkL/85">
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Site Vitrine Clé en Main</li>
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Optimisation Google Maps / My Business</li>
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Nom de domaine &amp; Hébergement 1 an</li>
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Support technique inclus</li>
+          </ul>
+          <a href="#contact" class="btn-outline mt-6 text-center font-semibold px-6 py-3 rounded-xl text-inkL">Choisir Décollage</a>
+        </div>
+      </article>
+
+      <!-- Pack 2 -->
+      <article data-reveal class="tilt relative overflow-hidden bg-inkL text-cream rounded-2xl p-6 flex flex-col" style="box-shadow:0 30px 70px -34px rgba(0,240,255,.5)">
+        <span class="absolute top-5 right-5 text-[10px] font-bold uppercase tracking-widest text-ink bg-cyan px-2.5 py-1 rounded-full">Recommandé</span>
+        <span class="text-xs uppercase tracking-widest text-cream/60">Acquisition</span>
+        <div class="mt-3 flex items-end gap-1">
+          <span class="text-cream/60 text-sm mb-1">dès</span>
+          <span class="font-display font-extrabold text-4xl">790€<span class="text-lg font-semibold text-cream/60">/mois</span></span>
+        </div>
+        <p class="text-cream/70 mt-2 text-sm">Pack Croissance — Attirez de nouveaux clients en continu.</p>
+        <ul class="mt-6 space-y-3 text-sm text-cream/90">
+          <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Gestion complète Meta &amp; Google Ads</li>
+          <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Création mensuelle de visuels &amp; vidéos</li>
+          <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Optimisation mensuelle du taux de conversion</li>
+          <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Rapport mensuel clair sur votre ROI</li>
+        </ul>
+        <a href="#contact" class="btn-warm mt-6 text-center font-bold px-6 py-3 rounded-xl">Booster mes ventes</a>
+      </article>
+
+      <!-- Pack 3 -->
+      <article data-reveal class="tilt relative overflow-hidden bg-white border border-lineL rounded-2xl p-6 flex flex-col">
+        <div class="glow-orb"></div>
+        <div class="depth flex flex-col h-full">
+          <span class="text-xs uppercase tracking-widest text-mutedL">Automatisation</span>
+          <div class="mt-3">
+            <span class="font-display font-extrabold text-4xl text-inkL">Sur devis</span>
+          </div>
+          <p class="text-mutedL mt-2 text-sm">Pack Révolution IA — Faites tourner votre établissement en pilote automatique.</p>
+          <ul class="mt-4 space-y-2 text-sm text-inkL/85">
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Agent IA / Chatbot de réservation 24/7</li>
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Système d'Avis Google automatique</li>
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Automatisations WhatsApp &amp; SMS</li>
+            <li class="flex gap-3"><span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-cyan shrink-0"></span>Connexion à vos outils (CRM, Caisse)</li>
+          </ul>
+          <a href="#contact" class="btn-outline mt-6 text-center font-semibold px-6 py-3 rounded-xl text-inkL">Demander un devis IA</a>
+        </div>
+      </article>
+    </div>
+    <p data-reveal class="text-center text-mutedL text-sm mt-6">Besoin d'un seul service ? On fait aussi à la carte — demandez votre devis.</p>
+  </div>
+</section>
+
+<!-- ================= EXEMPLES / FLYERS ================= -->
+<section id="exemples" class="py-5 md:py-8 px-5 md:px-8 bg-sand">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center max-w-2xl mx-auto mb-5">
+      <span data-reveal class="text-xs tracking-[.25em] uppercase text-warm">Réalisations</span>
+      <h2 data-reveal class="font-display font-bold mt-4 text-inkL text-[clamp(1.5rem,3.2vw,2.3rem)] leading-none tracking-tight">Un aperçu de nos créations</h2>
+      <p data-reveal class="text-mutedL mt-4">Des visuels réalisés pour des commerces. Survolez une carte pour la voir en couleur.</p>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+      <!-- Poster 1: Crousty -->
+      <div data-reveal class="pf-card rounded-2xl overflow-hidden bg-white">
+        <div class="poster t-crousty">
+          <div class="cat">Fast Food</div>
+          <div class="brand"><span class="bl">C</span> Crousty</div>
+          <div class="ttl">Menu <span class="acc">Crousty</span> Burger</div>
+          <div class="sub">Poulet croustillant &amp; sauce maison</div>
+          <div class="emo">🍔</div>
+          <div class="price"><small>À partir de</small><b>8,90€</b></div>
+          <div class="cta">Commandez vite</div>
+        </div>
+      </div>
+
+      <!-- Poster 2: Crunchy Chick -->
+      <div data-reveal class="pf-card rounded-2xl overflow-hidden bg-white">
+        <div class="poster t-chick">
+          <div class="cat">Restauration</div>
+          <div class="brand"><span class="bl">K</span> Crunchy Chick</div>
+          <div class="ttl">Tenders <span class="acc">&amp; Wings</span></div>
+          <div class="sub">100% filet de poulet marinée</div>
+          <div class="emo">🍗</div>
+          <div class="price"><small>Bucket dès</small><b>12,50€</b></div>
+          <div class="cta">Sur place ou à emporter</div>
+        </div>
+      </div>
+
+      <!-- Poster 3: Sushi Time -->
+      <div data-reveal class="pf-card rounded-2xl overflow-hidden bg-white">
+        <div class="poster t-sushi">
+          <div class="cat">Japonais</div>
+          <div class="brand"><span class="bl">S</span> Sushi Time</div>
+          <div class="ttl">Box <span class="acc">Salmon</span> Premium</div>
+          <div class="sub">24 pièces fraîcheur garantie</div>
+          <div class="emo">🍣</div>
+          <div class="price"><small>La Box à</small><b>19,90€</b></div>
+          <div class="cta">Livraison offerte</div>
+        </div>
+      </div>
+
+      <!-- Poster 4: Garage Auto -->
+      <div data-reveal class="pf-card rounded-2xl overflow-hidden bg-white">
+        <div class="poster t-auto">
+          <div class="cat">Automobile</div>
+          <div class="brand"><span class="bl">G</span> Auto Service</div>
+          <div class="ttl">Révision <span class="acc">Complète</span></div>
+          <div class="sub">Vidange, filtres &amp; 30 points de contrôle</div>
+          <div class="emo">🚗</div>
+          <div class="price"><small>Forfait</small><b>89,00€</b></div>
+          <div class="cta">Prendre RDV</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONTACT ================= -->
+<section id="contact" class="relative overflow-hidden py-5 md:py-8 px-5 md:px-8 bg-cream">
+  <div class="contact-glow"></div>
+  <div class="relative z-10 max-w-5xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+    <div>
+      <span data-reveal class="text-xs tracking-[.25em] uppercase text-warm">On en parle&nbsp;?</span>
+      <h2 data-reveal class="font-display font-bold mt-4 text-inkL text-[clamp(1.6rem,3.6vw,2.4rem)] leading-[1.12] tracking-tight">
+        Dites-nous <span class="text-grad-l">ce dont vous avez besoin</span>
+      </h2>
+      <p data-reveal class="text-mutedL mt-4 max-w-sm">On vous répond sous 24h avec un prix clair. Sans engagement.</p>
+      <ul data-reveal class="mt-6 space-y-3 text-sm text-inkL/85">
+        <li class="flex gap-3"><i class="fa-solid fa-check text-[#00A9C7] mt-0.5"></i>Devis gratuit sous 24h</li>
+        <li class="flex gap-3"><i class="fa-solid fa-check text-[#00A9C7] mt-0.5"></i>Sans engagement</li>
+        <li class="flex gap-3"><i class="fa-solid fa-check text-[#00A9C7] mt-0.5"></i>Un seul interlocuteur, du début à la fin</li>
+      </ul>
+    </div>
+
+    <form data-reveal id="contactForm" class="form-neon border border-lineL rounded-2xl p-5 md:p-6 overflow-hidden">
+      <div>
+        <label class="text-xs uppercase tracking-widest text-mutedL">Votre nom</label>
+        <input required name="nom" placeholder="Ex : Garage Martin" class="field-in mt-2 w-full rounded-xl px-4 py-3">
+      </div>
+      <div class="grid grid-cols-2 gap-3 mt-4">
+        <div>
+          <label class="text-xs uppercase tracking-widest text-mutedL">Téléphone</label>
+          <input name="tel" placeholder="06 …" class="field-in mt-2 w-full rounded-xl px-4 py-3">
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-widest text-mutedL">Email</label>
+          <input required type="email" name="email" placeholder="vous@exemple.fr" class="field-in mt-2 w-full rounded-xl px-4 py-3">
+        </div>
+      </div>
+      <div class="mt-4">
+        <label class="text-xs uppercase tracking-widest text-mutedL">Ce qui vous intéresse</label>
+        <select name="type" class="field-in mt-2 w-full rounded-xl px-4 py-3">
+          <option>Formule Décollage (Site web &amp; visibilité - dès 590€)</option>
+          <option>Formule Croissance (Publicité &amp; Acquisition - dès 790€/mois)</option>
+          <option>Formule Révolution IA (Automatisation &amp; Bots - Sur devis)</option>
+          <option>Prestation à la carte / Autre besoin</option>
+        </select>
+      </div>
+      <div class="mt-4">
+        <label class="text-xs uppercase tracking-widest text-mutedL">Votre message</label>
+        <textarea name="msg" rows="3" placeholder="En deux mots, votre activité et votre besoin…" class="field-in mt-2 w-full rounded-xl px-4 py-3 resize-none"></textarea>
+      </div>
+      <button type="submit" class="btn-warm font-bold w-full mt-5 py-3.5 rounded-xl">
+        Envoyer ma demande <i class="fa-solid fa-paper-plane ml-2"></i>
+      </button>
+      <p id="formOk" class="hidden text-center text-inkL mt-4 text-sm"><i class="fa-solid fa-circle-check mr-2 text-[#00A9C7]"></i>Message reçu — on vous rappelle sous 24h.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="border-t border-lineL py-4 px-5 md:px-8 bg-sand">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-6">
+    <div class="max-w-sm">
+      <div class="flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg grid place-items-center border border-edge bg-panel">
+          <svg viewBox="0 0 128 128" class="w-5 h-5">
+            <rect x="30" y="34" width="15" height="61" rx="7.5" fill="#F4F4F6"/>
+            <path d="M90 33 L55 64 L90 95" fill="none" stroke="#F4F4F6" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="80" cy="46" r="6.5" fill="#00F0FF"/>
+          </svg>
+        </span>
+        <span class="font-display font-bold text-lg text-inkL">kodevia</span>
+      </div>
+      <p class="text-mutedL text-sm mt-3 max-w-xs">Sites, publicité, contenu &amp; automatisation pour les commerces et les artisans. Tout au même endroit.</p>
+    </div>
+    <div class="flex gap-10">
+      <div>
+        <h4 class="text-xs uppercase tracking-widest text-mutedL mb-4">Le site</h4>
+        <ul class="space-y-2.5 text-sm text-inkL/80">
+          <li><a href="#services" class="hover:text-inkL transition">Ce qu'on fait</a></li>
+          <li><a href="#tarifs" class="hover:text-inkL transition">Tarifs</a></li>
+          <li><a href="#exemples" class="hover:text-inkL transition">Exemples</a></li>
+          <li><a href="#contact" class="hover:text-inkL transition">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-xs uppercase tracking-widest text-mutedL mb-4">Nous suivre</h4>
+        <div class="flex gap-3 text-lg text-inkL">
+          <a href="#" class="w-10 h-10 grid place-items-center rounded-lg bg-ink text-cyan hover:-translate-y-0.5 transition"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" class="w-10 h-10 grid place-items-center rounded-lg bg-ink text-cyan hover:-translate-y-0.5 transition"><i class="fa-brands fa-tiktok"></i></a>
+          <a href="#" class="w-10 h-10 grid place-items-center rounded-lg bg-ink text-cyan hover:-translate-y-0.5 transition"><i class="fa-brands fa-facebook-f"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto mt-4 pt-4 border-t border-lineL flex flex-wrap justify-between gap-3 text-xs text-mutedL">
+    <span>© <span id="yr"></span> kodevia. Tous droits réservés.</span>
+    <span>Fait avec soin, près de chez vous.</span>
+  </div>
+</footer>
+
+<!-- ================= SCRIPTS ================= -->
+<script>
+const REDUCE = matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ---------- HERO — Three.js : lettre "K" 3D néon + particules ---------- */
+(function initThree(){
+  if(!window.THREE) return;
+  const canvas = document.getElementById('hero-canvas');
+  const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
+  camera.position.z = 7;
+
+  const group = new THREE.Group();
+  group.position.set(2.7, 0, 0);
+  scene.add(group);
+
+  const kMat = new THREE.MeshStandardMaterial({color:0x0E1116, metalness:0.85, roughness:0.22, emissive:0x08181d, emissiveIntensity:0.6});
+  const KD = 0.95;
+  function kBar(w,h,x,y,rot){
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,KD), kMat);
+    mesh.position.set(x,y,0); mesh.rotation.z = rot; group.add(mesh);
+    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), new THREE.LineBasicMaterial({color:0x00F0FF, transparent:true, opacity:0.9}));
+    edges.position.copy(mesh.position); edges.rotation.copy(mesh.rotation); group.add(edges);
+  }
+  kBar(0.95, 5.0, -1.20,  0.00,  0.000);
+  kBar(3.90, 0.95, 0.72,  1.20,  0.675);
+  kBar(3.90, 0.95, 0.72, -1.20, -0.675);
+
+  scene.add(new THREE.AmbientLight(0x404058, 0.7));
+  const l1 = new THREE.PointLight(0x00F0FF, 2.4, 60); l1.position.set(6,4,6);  scene.add(l1);
+  const l2 = new THREE.PointLight(0x2E7BFF, 2.4, 60); l2.position.set(-4,-3,5); scene.add(l2);
+  const l3 = new THREE.PointLight(0xFFFFFF, 1.0, 60); l3.position.set(0,2,-6);  scene.add(l3);
+
+  const N = 1100, pos = new Float32Array(N*3);
+  for(let i=0;i<N*3;i++) pos[i] = (Math.random()-0.5)*22;
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  const points = new THREE.Points(pGeo, new THREE.PointsMaterial({color:0xffffff, size:0.03, transparent:true, opacity:0.6}));
+  scene.add(points);
+
+  const mouse={x:0,y:0}, target={x:0,y:0};
+  addEventListener('mousemove', e=>{ mouse.x=(e.clientX/innerWidth-0.5); mouse.y=(e.clientY/innerHeight-0.5); });
+
+  function resize(){
+    const w=innerWidth, h=Math.max(innerHeight,600);
+    renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
+    if(w < 900){ group.position.set(0.3, 1.7, -1.5); }
+    else       { group.position.set(2.6, 0, 0); }
+  }
+  addEventListener('resize', resize); resize();
+
+  let hover=false;
+  const heroSection=document.getElementById('top');
+  heroSection.addEventListener('mouseenter',()=>hover=true);
+  heroSection.addEventListener('mouseleave',()=>hover=false);
+
+  const clock=new THREE.Clock();
+  (function animate(){
+    requestAnimationFrame(animate);
+    const t=clock.getElapsedTime();
+    target.x += (mouse.x-target.x)*0.05;
+    target.y += (mouse.y-target.y)*0.05;
+    group.rotation.y = t*0.35 + target.x*0.9;
+    group.rotation.x = Math.sin(t*0.3)*0.12 + target.y*0.5;
+    group.scale.setScalar(group.scale.x + ((hover?0.68:0.6)-group.scale.x)*0.08);
+    l1.position.x=Math.cos(t*0.6)*6; l1.position.z=Math.sin(t*0.6)*6;
+    l2.position.x=Math.cos(t*0.6+Math.PI)*5; l2.position.z=Math.sin(t*0.6+Math.PI)*5;
+    points.rotation.y = t*0.02;
+    camera.position.x=target.x; camera.position.y=-target.y; camera.lookAt(scene.position);
+    renderer.render(scene,camera);
+  })();
+})();
+
+/* ---------- GSAP ---------- */
+(function(){
+  if(!window.gsap) return;
+  gsap.registerPlugin(ScrollTrigger);
+  if(!REDUCE) gsap.from('[data-hero]', {y:34, opacity:0, duration:1, ease:'power3.out', stagger:0.12, delay:0.15});
+  gsap.utils.toArray('[data-reveal]').forEach(el=>{
+    if(REDUCE){ gsap.set(el,{opacity:1}); return; }
+    gsap.from(el, {y:44, opacity:0, duration:0.9, ease:'power3.out', scrollTrigger:{trigger:el, start:'top 88%'}});
+  });
+})();
+
+/* ---------- Tilt 3D ---------- */
+if(!REDUCE && matchMedia('(hover:hover)').matches){
+  document.querySelectorAll('.tilt').forEach(card=>{
+    card.addEventListener('mousemove', e=>{
+      const r=card.getBoundingClientRect();
+      const px=(e.clientX-r.left)/r.width, py=(e.clientY-r.top)/r.height;
+      card.style.transform=`perspective(900px) rotateX(${(0.5-py)*7}deg) rotateY(${(px-0.5)*9}deg)`;
+    });
+    card.addEventListener('mouseleave', ()=> card.style.transform='perspective(900px) rotateX(0) rotateY(0)');
+  });
+}
+
+/* ---------- Nav ---------- */
+const nav=document.getElementById('nav');
+addEventListener('scroll', ()=> nav.classList.toggle('scrolled', scrollY>20), {passive:true});
+
+/* ---------- Formulaire ---------- */
+document.getElementById('contactForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  document.getElementById('formOk').classList.remove('hidden');
+  e.target.querySelector('button').innerHTML='Demande envoyée <i class="fa-solid fa-check ml-2"></i>';
+});
+document.getElementById('yr').textContent=new Date().getFullYear();
+</script>
+</body>
+</html>
